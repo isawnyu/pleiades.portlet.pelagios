@@ -24,50 +24,46 @@
     </div>
 
 <script type="text/javascript">
-<!--
+jQuery(function($) {
   
-  function queryPelagios() {
-    jq.ajax({
+    $.ajax({
       "url": document.baseURI + "/@@pelagios-tagged",
       "success": function (data) {
         for (i=0; i<data.annotations.length; i++) {
           var a = data.annotations[i];
-          var p = jq("#pelagios-datasets-template dd").clone();
-          var h = jq("#pelagios-datasets-template h6").clone();
-          var d = jq("#pelagios-datasets");
-          jq(h).text(a[1]);
-          jq(p).append(h);
+          var p = $("#pelagios-datasets-template dd").clone();
+          var h = $("#pelagios-datasets-template h6").clone();
+          var d = $("#pelagios-datasets");
+          $(h).text(a[1]);
+          $(p).append(h);
           for (j=0; j<a[2].length; j++) {
             var label = a[2][j][1];
-            var s = jq("#pelagios-datasets-template span").clone();
+            var s = $("#pelagios-datasets-template span").clone();
             if (j==0) {
-              jq(s).text(label + " ");
+              $(s).text(label + " ");
             }
             else {
-              jq(s).text("; " + label + " ");
+              $(s).text("; " + label + " ");
             }
-            var l = jq("#pelagios-datasets-template a").clone();
-            jq(l).attr("href", a[2][j][2]);
-            jq(l).text("(" + a[2][j][0] + ")");
-            jq(s).append(l);
-            jq(p).append(s);
+            var l = $("#pelagios-datasets-template a").clone();
+            $(l).attr("href", a[2][j][2]);
+            $(l).text("(" + a[2][j][0] + ")");
+            $(s).append(l);
+            $(p).append(s);
           }
-          jq(p).append("<br>");
-          jq(d).append(p);
+          $(p).append("<br>");
+          $(d).append(p);
         }
-        jq("#pelagios-loading").hide();
-        jq("#pelagios-datasets").show();
+        $("#pelagios-loading").hide();
+        $("#pelagios-datasets").show();
       },
       "error": function (req, status, err) {
-        jq("#pelagios-loading-status").hide();
-        jq("#pelagios-loading-tip").show();
+        $("#pelagios-loading-status").hide();
+        $("#pelagios-loading-tip").show();
       }
     });
-  }
 
-  jq(document).ready(queryPelagios);
-
-  -->
+});
 </script>
 
 </dl>
