@@ -4,14 +4,23 @@ import json
 from time import time
 
 from Acquisition import aq_inner, aq_parent
-from plone.memoize.instance import memoize
 from zope.publisher.browser import BrowserView
 
 from Products.PleiadesEntity.content.interfaces import ILocation, IName, IPlace
 from pleiades.portlet.pelagios import client
 from plone.memoize import ram
+from plone.memoize.volatile import DontCache
 
 log = logging.getLogger("pleiades.portlet.pelagios")
+
+
+def _pelagios_cache_key(method, self, pid):
+    if pid:
+        # Ten minute RAM cache on API request
+        cache_time = time() // (10 * 60)
+        return '{}/{}'.format(pid, cache_time)
+    else:
+        raise DontCache
 
 
 class RelatedPelagiosJson(BrowserView):
@@ -19,8 +28,7 @@ class RelatedPelagiosJson(BrowserView):
     """Makes one Pelagios Flickr API call and writes data to be used in a
     portal template."""
 
-    # Ten minute RAM cache on API request
-    @ram.cache(lambda *args: time() // (10 * 60))
+    @ram.cache(_pelagios_cache_key)
     def _get_annotations(self, pid):
         try:
             annotations = client.annotations(pid)
