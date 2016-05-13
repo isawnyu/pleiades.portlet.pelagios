@@ -9,18 +9,14 @@ from zope.publisher.browser import BrowserView
 from Products.PleiadesEntity.content.interfaces import ILocation, IName, IPlace
 from pleiades.portlet.pelagios import client
 from plone.memoize import ram
-from plone.memoize.volatile import DontCache
 
 log = logging.getLogger("pleiades.portlet.pelagios")
 
 
 def _pelagios_cache_key(method, self, pid):
-    if pid:
-        # Ten minute RAM cache on API request
-        cache_time = time() // (10 * 60)
-        return '{}/{}'.format(pid, cache_time)
-    else:
-        raise DontCache
+    # Ten minute RAM cache on API request
+    cache_time = time() // (10 * 60)
+    return '{}/{}'.format(pid, cache_time)
 
 
 class RelatedPelagiosJson(BrowserView):
