@@ -1,6 +1,4 @@
-
-import httplib2
-import simplejson
+import requests
 from urllib import quote_plus
 
 from pprint import pprint
@@ -14,33 +12,32 @@ class PelagiosAPIError(Exception):
 
 def annotations(pid):
     purl = "http://pleiades.stoa.org/places/" + pid
+    escaped = quote_plus(purl)
     results = []
-    u = "http://pelagios.dme.ait.ac.at/api/places/" + quote_plus(
-        purl) + "/datasets.json"
-    h = httplib2.Http()
-    resp, content = h.request(u, "GET")
-    if resp['status'] == "200":
-        r = simplejson.loads(content)
-        for dataset in r:
-            print(dataset['uri'])
-            subs = []
-            for d in dataset.get('subsets', [dataset]):
-                if (dataset['title'] == (
-                    "Pleiades Annotations in the Perseus Digital Library")
-                    ) and d['title'] != "Greek and Roman Materials":
-                        continue
-                count = d['annotations_referencing_place']
-                label = d['title'].rstrip(".")
-                uri = d['uri'] + "/annotations?forPlace=%s" % purl
-                subs.append((count, label, uri))
-            results.append(
-                (len(subs), dataset['title'], sorted(subs, reverse=True)))
+    u = "http://pelagios.org/peripleo/places/" + escaped
+    resp = requests.get(u)
+    if resp.status_code == 200:
+        r = resp.json()
+        refs = r.get('referenced_in', [])
+        subs = []
+        for dataset in refs:
+            uri = u'http://pelagios.org/peripleo/map#places={}&datasets={}&f=open'.format(
+                escaped, dataset['identifier']
+            )
+            title = dataset['title']
+            if (title == "Pleiades Annotations in the Perseus Digital Library"
+                    ) and title != "Greek and Roman Materials":
+                continue
+            count = dataset['count']
+            label = title.rstrip(".")
+            subs.append((count, label, uri))
+        results.append(
+            (len(subs), r['title'], sorted(subs, reverse=True)))
     else:
-        raise PelagiosAPIError, repr(resp)
+        raise PelagiosAPIError(repr(resp))
     return sorted(results, reverse=True)
 
 if __name__ == "__main__":
     r = annotations("579885")
     pprint(r)
     print(len(r))
-

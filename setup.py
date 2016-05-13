@@ -25,6 +25,7 @@ setup(name='pleiades.portlet.pelagios',
       zip_safe=False,
       install_requires=[
           'setuptools',
+          'requests',
           # -*- Extra requirements: -*-
       ],
       entry_points="""

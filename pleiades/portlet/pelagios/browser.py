@@ -1,18 +1,15 @@
 import logging
-from random import choice
-from urllib import urlencode
 
-import httplib2
-import simplejson
+import json
+from time import time
 
 from Acquisition import aq_inner, aq_parent
 from plone.memoize.instance import memoize
-from Products.CMFCore.utils import getToolByName
-from zope.interface import implements, Interface, Attribute
-from zope.publisher.browser import BrowserPage, BrowserView
+from zope.publisher.browser import BrowserView
 
 from Products.PleiadesEntity.content.interfaces import ILocation, IName, IPlace
 from pleiades.portlet.pelagios import client
+from plone.memoize import ram
 
 log = logging.getLogger("pleiades.portlet.pelagios")
 
@@ -22,33 +19,41 @@ class RelatedPelagiosJson(BrowserView):
     """Makes one Pelagios Flickr API call and writes data to be used in a
     portal template."""
 
+    # Ten minute RAM cache on API request
+    @ram.cache(lambda *args: time() // (10 * 60))
+    def _get_annotations(self, pid):
+        try:
+            annotations = client.annotations(pid)
+        except client.PelagiosAPIError as e:
+            annotations = None
+            log.exception("Pelagios API Error: %s", str(e))
+        return annotations
+
     def __call__(self, **kw):
         data = {}
         context = self.context
-        
+
         if IPlace.providedBy(context):
-            pid = context.getId() # local id like "149492"
+            pid = context.getId()  # local id like "149492"
         elif ILocation.providedBy(context) or IName.providedBy(context):
             pid = aq_parent(aq_inner(context)).getId()
         else:
             pid = None
 
         if pid is not None:
-            try:
-                annotations = client.annotations(pid)
-                self.request.response.setStatus(200)
-            except client.PelagiosAPIError, e:
-                annotations = []
-                log.exception("Pelagios API Error: %s", str(e))
+            annotations = self._get_annotations(pid)
+            if annotations is None:
                 self.request.response.setStatus(500)
+                annotations = []
+            else:
+                self.request.response.setStatus(200)
         else:
             annotations = []
             self.request.response.setStatus(404)
 
         data = dict(
             pid=pid,
-            annotations=annotations )
-        
-        self.request.response.setHeader('Content-Type', 'application/json')
-        return simplejson.dumps(data)
+            annotations=annotations)
 
+        self.request.response.setHeader('Content-Type', 'application/json')
+        return json.dumps(data)
