@@ -14,8 +14,8 @@ log = logging.getLogger("pleiades.portlet.pelagios")
 
 
 def _pelagios_cache_key(method, self, pid):
-    # One day RAM cache on API request
-    cache_time = time() // (24 * 60 * 60)
+    # Two hour RAM cache on API request
+    cache_time = time() // (2 * 60 * 60)
     return '{}/{}'.format(pid, cache_time)
 
 

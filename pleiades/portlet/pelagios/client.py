@@ -1,7 +1,13 @@
+import logging
+
 import requests
+from time import time
 from urllib import quote_plus
 
 from pprint import pprint
+
+log = logging.getLogger("pleiades.portlet.pelagios")
+
 
 class PelagiosAPIError(Exception):
     def __init__(self, msg):
@@ -15,7 +21,15 @@ def annotations(pid):
     escaped = quote_plus(purl)
     results = []
     u = "http://pelagios.org/peripleo/places/" + escaped
-    resp = requests.get(u)
+
+    start = time()
+    try:
+        resp = requests.get(u, timeout=(2, 5))
+        log.info('Pelagios request for {} made in {} seconds'.format(
+            pid, time() - start))
+    except requests.exceptions.RequestException as e:
+        raise PelagiosAPIError(repr(e))
+
     if resp.status_code == 200:
         r = resp.json()
         refs = r.get('referenced_in', [])
