@@ -24,7 +24,7 @@ def annotations(pid):
 
     start = time()
     try:
-        resp = requests.get(u, timeout=(2, 5))
+        resp = requests.get(u, timeout=(3.05, 5))
         log.info('Pelagios request for {} made in {} seconds'.format(
             pid, time() - start))
     except requests.exceptions.RequestException as e:
