@@ -25,9 +25,9 @@
 
 <script type="text/javascript">
 jQuery(function($) {
-  
+    var base_uri = document.baseURI.replace(/\/$/, "");
     $.ajax({
-      "url": document.baseURI + "/@@pelagios-tagged",
+      "url": base_uri + "/@@pelagios-tagged",
       "success": function (data) {
         for (i=0; i<data.annotations.length; i++) {
           var a = data.annotations[i];
