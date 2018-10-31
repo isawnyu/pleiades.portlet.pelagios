@@ -17,7 +17,7 @@ class PelagiosAPIError(Exception):
 
 
 def annotations(pid):
-    purl = "http://pleiades.stoa.org/places/" + pid
+    purl = "https://pleiades.stoa.org/places/" + pid
     escaped = quote_plus(purl)
     results = []
     u = "http://pelagios.org/peripleo/places/" + escaped
@@ -35,12 +35,12 @@ def annotations(pid):
         refs = r.get('referenced_in', [])
         subs = []
         for dataset in refs:
-            uri = u'http://pelagios.org/peripleo/map#places={}&datasets={}&f=open'.format(
-                escaped, dataset['identifier']
-            )
+            uri = dataset['peripleo_url'].replace(
+                '127.0.0.1:9002', 'peripleo.pelagios.org')
             title = dataset['title']
-            if (title == "Pleiades Annotations in the Perseus Digital Library"
-                    ) and title != "Greek and Roman Materials":
+            if (
+                title == "Pleiades Annotations in the Perseus Digital Library"
+            ) and title != "Greek and Roman Materials":
                 continue
             count = dataset['count']
             label = title.rstrip(".")
@@ -50,6 +50,7 @@ def annotations(pid):
     else:
         raise PelagiosAPIError(repr(resp))
     return sorted(results, reverse=True)
+
 
 if __name__ == "__main__":
     r = annotations("579885")
