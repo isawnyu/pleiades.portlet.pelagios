@@ -17,7 +17,7 @@ class PelagiosAPIError(Exception):
 
 
 def annotations(pid):
-    purl = "https://pleiades.stoa.org/places/" + pid
+    purl = "http://pleiades.stoa.org/places/" + pid
     escaped = quote_plus(purl)
     results = []
     u = "http://pelagios.org/peripleo/places/" + escaped
