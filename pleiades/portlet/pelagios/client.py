@@ -20,7 +20,7 @@ def annotations(pid):
     purl = "http://pleiades.stoa.org/places/" + pid
     escaped = quote_plus(purl)
     results = []
-    u = "http://pelagios.org/peripleo/places/" + escaped
+    u = "https://peripleo.pelagios.org/peripleo/places/" + escaped
 
     start = time()
     try:
@@ -35,8 +35,7 @@ def annotations(pid):
         refs = r.get('referenced_in', [])
         subs = []
         for dataset in refs:
-            uri = dataset['peripleo_url'].replace(
-                '127.0.0.1:9002', 'peripleo.pelagios.org')
+            uri = dataset['peripleo_url']
             title = dataset['title']
             if (
                 title == "Pleiades Annotations in the Perseus Digital Library"
